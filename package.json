@@ -1,0 +1,9 @@
+{
+  "name": "ground-booking-root",
+  "version": "1.0.0",
+  "description": "Root package.json for Render deployment",
+  "scripts": {
+    "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client && npm install --prefix server",
+    "start": "npm start --prefix server"
+  }
+}

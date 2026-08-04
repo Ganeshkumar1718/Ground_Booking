@@ -1058,12 +1058,20 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-// Generic fallbacks
-app.get('*', (req, res) => res.json([]));
+// Serve static files from the React frontend app
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// Generic fallbacks for API
 app.post('*', (req, res) => res.json({ success: true }));
 app.put('*', (req, res) => res.json({ success: true }));
 app.patch('*', (req, res) => res.json({ success: true }));
 app.delete('*', (req, res) => res.json({ success: true }));
+
+// For any other GET request, send the React index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 
