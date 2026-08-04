@@ -1,20 +1,34 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
+const { createClient } = require('@libsql/client');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-let dbPromise;
+let dbClient;
 
 async function initDB() {
   try {
-    dbPromise = open({
-      filename: path.join(__dirname, 'playspot.sqlite'),
-      driver: sqlite3.Database
+    dbClient = createClient({
+      url: process.env.TURSO_DATABASE_URL || 'file:playspot.sqlite',
+      authToken: process.env.TURSO_AUTH_TOKEN
     });
 
-    const db = await dbPromise;
+    console.log('✅ Connected to database (Turso/SQLite)');
 
-    console.log('✅ Connected to SQLite database');
+    // Wrapper for existing queries in initDB
+    const db = {
+      exec: async (sql) => dbClient.execute(sql),
+      run: async (sql, params = []) => {
+        const res = await dbClient.execute({ sql, args: params });
+        return { lastID: res.lastInsertRowid ? Number(res.lastInsertRowid) : 0, changes: res.rowsAffected };
+      },
+      all: async (sql, params = []) => {
+        const res = await dbClient.execute({ sql, args: params });
+        return res.rows;
+      },
+      get: async (sql, params = []) => {
+        const res = await dbClient.execute({ sql, args: params });
+        return res.rows[0];
+      }
+    };
 
     // Create necessary tables
     await db.exec(`
@@ -296,15 +310,14 @@ async function initDB() {
 module.exports = {
   initDB,
   query: async (sql, params = []) => {
-    if (!dbPromise) throw new Error('Database not initialized');
-    const db = await dbPromise;
+    if (!dbClient) throw new Error('Database not initialized');
+    
+    const result = await dbClient.execute({ sql, args: params });
     
     if (sql.trim().toUpperCase().startsWith('SELECT')) {
-      const rows = await db.all(sql, params);
-      return [rows]; 
+      return [result.rows]; 
     } else {
-      const result = await db.run(sql, params);
-      return [{ insertId: result.lastID, affectedRows: result.changes }]; 
+      return [{ insertId: result.lastInsertRowid ? Number(result.lastInsertRowid) : 0, affectedRows: result.rowsAffected }]; 
     }
   }
 };

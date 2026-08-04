@@ -6,16 +6,23 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const multer = require('multer');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 require('dotenv').config();
 const db = require('./db');
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, 'uploads'))
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'playspot_uploads',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp']
   }
 });
 const upload = multer({ storage: storage });
@@ -23,7 +30,7 @@ const upload = multer({ storage: storage });
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// /uploads static route removed since we use Cloudinary directly
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
@@ -217,7 +224,8 @@ app.post('/api/grounds/:id/photos', protect, upload.single('photo'), async (req,
   try {
     if (!req.file) return res.status(400).json({ message: 'No photo uploaded' });
     const groundId = req.params.id;
-    const photoUrl = '/uploads/' + req.file.filename;
+    // CloudinaryStorage sets the secure URL in req.file.path
+    const photoUrl = req.file.path;
     const { latitude, longitude, category } = req.body;
 
     await db.query(
