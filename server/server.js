@@ -1063,6 +1063,17 @@ async function startServer() {
   await db.initDB();
   server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+  }
+);
+}
+
+// Export the Express app for Vercel serverless deployment
+module.exports = app;
+
+// Start the server only when run directly (local development)
+if (require.main === module) {
+  startServer();
+}
   });
 }
 

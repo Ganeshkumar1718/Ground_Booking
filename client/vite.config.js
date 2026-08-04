@@ -8,6 +8,9 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  build: {
+    modulePreload: false
+  },
   server: {
     proxy: {
       '/api': {
