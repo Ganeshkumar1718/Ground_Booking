@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  font-family: 'Inter', sans-serif;
+  color-scheme: dark light;
+}
+
+body {
+  margin: 0;
+  background-color: #0f172a; /* Slate 900 dark navy default */
+  background-image: url('./assets/background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-blend-mode: overlay;
+  color: #f1f5f9;
+  min-height: 100vh;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Custom Scrollbar for sleek UI */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #22c55e; /* green accent on scroll hover */
+}
+
+/* Light Mode Filter Hack */
+html.light-mode {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.light-mode img,
+html.light-mode video,
+html.light-mode .no-invert,
+html.light-mode [style*="background-image"] {
+  filter: invert(1) hue-rotate(180deg);
+}

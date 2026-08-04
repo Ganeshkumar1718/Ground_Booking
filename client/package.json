@@ -1,0 +1,35 @@
+{
+  "name": "playspot-client",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "axios": "^1.6.8",
+    "axios-mock-adapter": "^2.1.0",
+    "lucide-react": "^0.379.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-hot-toast": "^2.4.1",
+    "react-router-dom": "^7.18.1",
+    "recharts": "^2.12.7",
+    "socket.io-client": "^4.7.5",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@rolldown/plugin-babel": "^0.2.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "oxlint": "^1.71.0",
+    "vite": "^8.1.1"
+  }
+}
