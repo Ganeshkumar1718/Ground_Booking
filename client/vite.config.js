@@ -9,7 +9,17 @@ export default defineConfig({
     tailwindcss()
   ],
   build: {
-    modulePreload: false
+    modulePreload: false,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          recharts: ['recharts'],
+          lucide: ['lucide-react']
+        }
+      }
+    }
   },
   server: {
     proxy: {
