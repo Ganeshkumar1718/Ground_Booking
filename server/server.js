@@ -1059,7 +1059,6 @@ app.get('/api/admin/stats', async (req, res) => {
 });
 
 // Serve static files from the React frontend app
-const path = require('path');
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Generic fallbacks for API
@@ -1090,7 +1089,3 @@ module.exports = app;
 if (require.main === module) {
   startServer();
 }
-  });
-}
-
-startServer();

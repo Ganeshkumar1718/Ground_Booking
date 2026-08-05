@@ -10,16 +10,7 @@ export default defineConfig({
   ],
   build: {
     modulePreload: false,
-    chunkSizeWarningLimit: 1000,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          recharts: ['recharts'],
-          lucide: ['lucide-react']
-        }
-      }
-    }
+    chunkSizeWarningLimit: 1000
   },
   server: {
     proxy: {

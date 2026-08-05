@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create Axios default config
 // Removed hardcoded baseURL to allow Vite proxy to handle /api requests during development
-// axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {

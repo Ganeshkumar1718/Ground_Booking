@@ -269,7 +269,7 @@ async function initDB() {
       );
       console.log('✅ Admin user initialized: admin@playspot.com / admin123');
     } else {
-      await db.run('UPDATE users SET password = ?, role = "admin", status = "active" WHERE email = ?', [hashedPassword, 'admin@playspot.com']);
+      await db.run("UPDATE users SET password = ?, role = 'admin', status = 'active' WHERE email = ?", [hashedPassword, 'admin@playspot.com']);
     }
 
     // Dummy data initialization
