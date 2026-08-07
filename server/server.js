@@ -41,8 +41,19 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
 const upload = multer({ storage: storage });
 
 const app = express();
+const allowedOrigins = ['http://localhost:5173'];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -50,7 +61,18 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: 'http://localhost:5173', credentials: true } });
+const io = new Server(server, { 
+  cors: { 
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }, 
+    credentials: true 
+  } 
+});
 
 // Secret Key
 const SECRET_KEY = process.env.JWT_SECRET || 'supersecret';
