@@ -6,6 +6,7 @@ const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
 const multer = require('multer');
+const fs = require('fs');
 const { v2: cloudinary } = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 require('dotenv').config();
@@ -161,6 +162,46 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.get('/api/auth/me', protect, (req, res) => {
   res.json({ id: req.user.id, name: req.user.name, email: req.user.email, phone: req.user.phone, role: req.user.role });
+});
+
+// --- DEPLOYMENT STATUS ROUTE ---
+app.get('/api/deployment-status', (req, res) => {
+  // Check Vercel
+  const rootDir = path.join(__dirname, '..');
+  const hasVercelDir = fs.existsSync(path.join(rootDir, '.vercel'));
+  const hasVercelJson = fs.existsSync(path.join(rootDir, 'vercel.json'));
+  const vercelEnv = process.env.VERCEL || process.env.VERCEL_ENV;
+  
+  let vercelMissing = [];
+  if (!hasVercelDir && !hasVercelJson && !vercelEnv) {
+    vercelMissing.push('No .vercel directory found (run vercel link)');
+    vercelMissing.push('No vercel.json found');
+  }
+
+  // Check Render
+  const hasRenderYaml = fs.existsSync(path.join(rootDir, 'render.yaml'));
+  const renderEnv = process.env.RENDER || process.env.RENDER_SERVICE_NAME;
+
+  let renderMissing = [];
+  if (!hasRenderYaml && !renderEnv) {
+    renderMissing.push('No render.yaml found (optional but recommended)');
+    renderMissing.push('RENDER environment variables not detected');
+  }
+
+  res.json({
+    vercel: {
+      connected: !!(hasVercelDir || hasVercelJson || vercelEnv),
+      environment: process.env.VERCEL_ENV || 'Unknown/Local',
+      url: process.env.VERCEL_URL ? \`https://\${process.env.VERCEL_URL}\` : null,
+      missingConfig: vercelMissing
+    },
+    render: {
+      connected: !!(hasRenderYaml || renderEnv),
+      serviceName: process.env.RENDER_SERVICE_NAME || 'Unknown',
+      url: process.env.RENDER_EXTERNAL_URL || null,
+      missingConfig: renderMissing
+    }
+  });
 });
 
 // --- LOCATIONS ROUTES ---

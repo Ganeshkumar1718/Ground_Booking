@@ -108,7 +108,8 @@ export default function Navbar() {
               { path: '/explore', label: 'Grounds' },
               { path: '/user/bookings', label: 'Bookings' },
               { path: '/tournaments', label: 'Tournaments' },
-              { path: '/contact', label: 'Contact Us' }
+              { path: '/contact', label: 'Contact Us' },
+              { path: '/deployment-status', label: 'Status' }
             ].map(link => {
               const isActive = link.path === '/' ? location.pathname === '/' : location.pathname.startsWith(link.path);
               return (
@@ -253,7 +254,8 @@ export default function Navbar() {
             { path: '/explore', label: 'Grounds' },
             { path: '/user/bookings', label: 'Bookings' },
             { path: '/tournaments', label: 'Tournaments' },
-            { path: '/contact', label: 'Contact Us' }
+            { path: '/contact', label: 'Contact Us' },
+            { path: '/deployment-status', label: 'Status' }
           ].map(link => {
             const isActive = link.path === '/' ? location.pathname === '/' : location.pathname.startsWith(link.path);
             return (

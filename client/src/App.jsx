@@ -20,6 +20,7 @@ import GroundDetailsPage from './pages/GroundDetailsPage';
 import ProfilePage from './pages/ProfilePage';
 import ContactUs from './pages/ContactUs';
 import Tournaments from './pages/Tournaments';
+import DeploymentStatusPage from './pages/DeploymentStatusPage';
 
 // Dashboards
 import UserDashboard from './pages/user/UserDashboard';
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="/grounds/:id" element={<ProtectedRoute><GroundDetailsPage /></ProtectedRoute>} />
               <Route path="/contact" element={<ProtectedRoute><ContactUs /></ProtectedRoute>} />
               <Route path="/tournaments" element={<ProtectedRoute><Tournaments /></ProtectedRoute>} />
+              <Route path="/deployment-status" element={<ProtectedRoute><DeploymentStatusPage /></ProtectedRoute>} />
               
               {/* User Dashboard Protected Routes */}
               <Route path="/user/dashboard" element={
