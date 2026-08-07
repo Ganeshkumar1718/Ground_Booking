@@ -3,6 +3,7 @@ import { Trophy, Calendar, Users, MapPin, ArrowRight, X, Sparkles, Bell, Clock, 
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../config';
 
 export default function Tournaments() {
   const [tournaments, setTournaments] = useState([]);
@@ -221,7 +222,7 @@ export default function Tournaments() {
                   {/* Image Poster */}
                   <div className="h-52 relative overflow-hidden bg-slate-950">
                     <img 
-                      src={t.image || `https://loremflickr.com/800/600/tournament?lock=${t.id}`}
+                      src={getImageUrl(t.image)}
                       alt={t.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60"
                     />
