@@ -18,22 +18,39 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'playspot_uploads',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp']
-  }
-});
+let storage;
+if (process.env.CLOUDINARY_CLOUD_NAME) {
+  storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: 'playspot_uploads',
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp']
+    }
+  });
+} else {
+  storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname, 'uploads/'));
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + '-' + file.originalname);
+    }
+  });
+}
 const upload = multer({ storage: storage });
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
-// /uploads static route removed since we use Cloudinary directly
+// Serve local uploads for seeded data fallback
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+const io = new Server(server, { cors: { origin: 'http://localhost:5173', credentials: true } });
 
 // Secret Key
 const SECRET_KEY = process.env.JWT_SECRET || 'supersecret';
@@ -201,7 +218,7 @@ app.post('/api/grounds', protect, async (req, res) => {
     const { name, description, address, city, district_id, area_id, state, latitude, longitude, advance_percentage, price_type, ground_type, pitch_type, sports } = req.body;
     
     const [result] = await db.query(
-      'INSERT INTO grounds (owner_id, name, description, address, city, district_id, area_id, state, latitude, longitude, advance_percentage, price_type, ground_type, pitch_type, status, owner_email, owner_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pending", ?, ?)',
+      "INSERT INTO grounds (owner_id, name, description, address, city, district_id, area_id, state, latitude, longitude, advance_percentage, price_type, ground_type, pitch_type, status, owner_email, owner_phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)",
       [req.user.id, name, description, address, city, district_id || null, area_id || null, state || 'Tamil Nadu', latitude || null, longitude || null, advance_percentage || 20, price_type || 'hour', ground_type || null, pitch_type || null, req.user.email, req.user.phone]
     );
 
@@ -224,8 +241,10 @@ app.post('/api/grounds/:id/photos', protect, upload.single('photo'), async (req,
   try {
     if (!req.file) return res.status(400).json({ message: 'No photo uploaded' });
     const groundId = req.params.id;
-    // CloudinaryStorage sets the secure URL in req.file.path
-    const photoUrl = req.file.path;
+    // Use Cloudinary URL if available, else local path
+    const photoUrl = req.file.path && req.file.path.startsWith('http') 
+      ? req.file.path 
+      : `/uploads/${req.file.filename}`;
     const { latitude, longitude, category } = req.body;
 
     await db.query(
@@ -262,7 +281,7 @@ app.post('/api/grounds/:id/submit', protect, async (req, res) => {
   try {
     const groundId = req.params.id;
     // Ground is strictly pending admin verification
-    await db.query('UPDATE grounds SET status = "pending" WHERE id = ?', [groundId]);
+    await db.query("UPDATE grounds SET status = 'pending' WHERE id = ?", [groundId]);
     
     const [grounds] = await db.query('SELECT name, owner_id FROM grounds WHERE id = ?', [groundId]);
     const groundName = grounds[0]?.name || 'Arena';
@@ -319,7 +338,7 @@ app.get('/api/grounds', async (req, res) => {
       FROM grounds g
       LEFT JOIN districts d ON g.district_id = d.id
       LEFT JOIN areas a ON g.area_id = a.id
-      WHERE g.status = "approved"
+      WHERE g.status = 'approved'
     `;
     let params = [];
     if (search) {
@@ -404,7 +423,7 @@ app.patch('/api/admin/grounds/:id/approve', protect, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Forbidden' });
   try {
     const groundId = req.params.id;
-    await db.query('UPDATE grounds SET status = "approved", verified_at = CURRENT_TIMESTAMP WHERE id = ?', [groundId]);
+    await db.query("UPDATE grounds SET status = 'approved', verified_at = CURRENT_TIMESTAMP WHERE id = ?", [groundId]);
     
     const [grounds] = await db.query('SELECT g.*, u.name as owner_name, u.id as owner_user_id FROM grounds g LEFT JOIN users u ON g.owner_id = u.id WHERE g.id = ?', [groundId]);
     const ground = grounds[0];
@@ -880,7 +899,7 @@ app.post('/api/slots', protect, async (req, res) => {
       );
       if (existing.length === 0) {
         await db.query(
-          'INSERT INTO slots (ground_id, sport_id, booking_date, start_time, end_time, price, status) VALUES (?, ?, ?, ?, ?, ?, "available")',
+          "INSERT INTO slots (ground_id, sport_id, booking_date, start_time, end_time, price, status) VALUES (?, ?, ?, ?, ?, ?, 'available')",
           [ground_id, sport_id, booking_date, st, et, price]
         );
       }
@@ -905,7 +924,7 @@ app.patch('/api/slots/:id/block', protect, async (req, res) => {
 
 app.patch('/api/slots/:id/unblock', protect, async (req, res) => {
   try {
-    await db.query('UPDATE slots SET status = "available" WHERE id = ?', [req.params.id]);
+    await db.query("UPDATE slots SET status = 'available' WHERE id = ?", [req.params.id]);
     io.emit('slotStatusUpdated', { slotId: parseInt(req.params.id), status: 'available' });
     res.json({ success: true });
   } catch (err) {
@@ -958,7 +977,7 @@ app.post('/api/bookings', protect, async (req, res) => {
     const bookingRef = 'BKG' + Date.now();
     
     const [result] = await db.query(
-      'INSERT INTO bookings (user_id, slot_id, booking_ref, amount, status) VALUES (?, ?, ?, ?, "pending")',
+      "INSERT INTO bookings (user_id, slot_id, booking_ref, amount, status) VALUES (?, ?, ?, ?, 'pending')",
       [req.user.id, slot_id, bookingRef, slot.price]
     );
     
@@ -972,12 +991,12 @@ app.post('/api/bookings/:id/pay', protect, async (req, res) => {
   try {
     const { status } = req.body;
     if (status === 'success') {
-      await db.query('UPDATE bookings SET status = "confirmed" WHERE id = ?', [req.params.id]);
+      await db.query("UPDATE bookings SET status = 'confirmed' WHERE id = ?", [req.params.id]);
       
       const [bookings] = await db.query('SELECT * FROM bookings WHERE id = ?', [req.params.id]);
       if (bookings.length > 0) {
         const slot_id = bookings[0].slot_id;
-        await db.query('UPDATE slots SET status = "booked" WHERE id = ?', [slot_id]);
+        await db.query("UPDATE slots SET status = 'booked' WHERE id = ?", [slot_id]);
         
         const [slots] = await db.query('SELECT * FROM slots WHERE id = ?', [slot_id]);
         if (slots.length > 0) {
@@ -1011,8 +1030,8 @@ app.patch('/api/bookings/:id/cancel', protect, async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized' });
     }
     
-    await db.query('UPDATE bookings SET status = "cancelled" WHERE id = ?', [req.params.id]);
-    await db.query('UPDATE slots SET status = "available" WHERE id = ?', [booking.slot_id]);
+    await db.query("UPDATE bookings SET status = 'cancelled' WHERE id = ?", [req.params.id]);
+    await db.query("UPDATE slots SET status = 'available' WHERE id = ?", [booking.slot_id]);
     
     io.emit('slotStatusUpdated', { slotId: booking.slot_id, status: 'available' });
     
@@ -1059,7 +1078,7 @@ app.get('/api/admin/stats', async (req, res) => {
 });
 
 // Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, '../client/dist')));
+// app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Generic fallbacks for API
 app.post('*', (req, res) => res.json({ success: true }));
@@ -1068,9 +1087,9 @@ app.patch('*', (req, res) => res.json({ success: true }));
 app.delete('*', (req, res) => res.json({ success: true }));
 
 // For any other GET request, send the React index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-});
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+// });
 
 const PORT = process.env.PORT || 5000;
 
