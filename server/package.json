@@ -20,6 +20,8 @@
     "multer-storage-cloudinary": "^4.0.0",
     "mysql2": "^3.9.7",
     "nodemailer": "^6.9.13",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
   }
 }

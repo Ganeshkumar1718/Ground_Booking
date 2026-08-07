@@ -11,6 +11,7 @@ async function seed() {
   console.log('Connected to DB');
 
   // Clear existing data
+  await db.exec('DELETE FROM ground_photos');
   await db.exec('DELETE FROM ground_sports');
   await db.exec('DELETE FROM grounds');
   await db.exec('DELETE FROM areas');
@@ -185,7 +186,7 @@ async function seed() {
     const areaInfo = areaLookup[g[2].toLowerCase()] || { id: 1, district_id: 1, district_name: 'Chennai' };
 
     await db.run(
-      'INSERT INTO grounds (id, name, district_id, area_id, address, city, state, average_rating, status, price_type, advance_percentage, main_photo) VALUES (?, ?, ?, ?, ?, ?, "Tamil Nadu", ?, "approved", "hour", 20, ?)',
+      'INSERT INTO grounds (id, name, district_id, area_id, address, city, state, average_rating, status, price_type, advance_percentage, main_photo) VALUES (?, ?, ?, ?, ?, ?, "Tamil Nadu", ?, \'approved\', "hour", 20, ?)',
       [g[0], g[1], areaInfo.district_id, areaInfo.id, g[3], areaInfo.district_name, g[4], photo]
     );
   }
@@ -202,6 +203,45 @@ async function seed() {
 
   for (let pair of gs) {
     await db.run('INSERT INTO ground_sports (ground_id, sport_id) VALUES (?, ?)', [pair[0], pair[1]]);
+  }
+
+  // 5.5 GROUND PHOTOS
+  const cricketPhotos = [];
+  const footballPhotos = [];
+  const shuttlePhotos = [];
+
+  for (let pair of gs) {
+    const gId = pair[0];
+    const sId = pair[1];
+    const photo = groundImageMap[gId] || '/uploads/default-main.jpg';
+    if (sId === 1 && !cricketPhotos.includes(photo)) cricketPhotos.push(photo);
+    if (sId === 2 && !footballPhotos.includes(photo)) footballPhotos.push(photo);
+    if (sId === 3 && !shuttlePhotos.includes(photo)) shuttlePhotos.push(photo);
+  }
+
+  const groundMap = {};
+  for (let pair of gs) {
+    if (!groundMap[pair[0]]) groundMap[pair[0]] = [];
+    groundMap[pair[0]].push(pair[1]);
+  }
+
+  for (let gId in groundMap) {
+    const sports = groundMap[gId];
+    let photosToInsert = [];
+    if (sports.includes(1)) {
+        for(let i=0; i<3; i++) photosToInsert.push(cricketPhotos[Math.floor(Math.random() * cricketPhotos.length)]);
+    }
+    if (sports.includes(2)) {
+        for(let i=0; i<3; i++) photosToInsert.push(footballPhotos[Math.floor(Math.random() * footballPhotos.length)]);
+    }
+    if (sports.includes(3)) {
+        for(let i=0; i<3; i++) photosToInsert.push(shuttlePhotos[Math.floor(Math.random() * shuttlePhotos.length)]);
+    }
+    photosToInsert = [...new Set(photosToInsert)];
+    for (let photo of photosToInsert) {
+        // photo already includes '/uploads/' because it's from groundImageMap
+        await db.run('INSERT INTO ground_photos (ground_id, photo_url, category) VALUES (?, ?, ?)', [gId, photo, 'general']);
+    }
   }
 
   // 6. RICH SLOTS (14 days ahead)
