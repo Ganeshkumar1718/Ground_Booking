@@ -3,8 +3,9 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import axios from 'axios';
+import { API_URL } from './config';
 
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 
 createRoot(document.getElementById('root')).render(

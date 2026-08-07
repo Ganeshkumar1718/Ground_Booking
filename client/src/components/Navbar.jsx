@@ -5,6 +5,7 @@ import { Menu, X, Bell, LogOut, User, MapPin, Moon, Sun, ChevronDown } from 'luc
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
+import { API_URL } from '../config';
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -35,8 +36,7 @@ export default function Navbar() {
         .catch(err => console.error('Error fetching notifications:', err));
 
       if (!socketRef.current) {
-        const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        socketRef.current = io(socketUrl, { withCredentials: true });
+        socketRef.current = io(API_URL, { withCredentials: true });
       }
       
       const s = socketRef.current;

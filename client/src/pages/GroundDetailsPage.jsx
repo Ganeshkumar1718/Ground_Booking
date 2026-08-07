@@ -6,6 +6,7 @@ import { Star, Heart, MapPin, Calendar, Clock, CreditCard, ChevronRight, Activit
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import AIChatbox from '../components/AIChatbox';
+import { API_URL } from '../config';
 
 export default function GroundDetailsPage() {
   const { id } = useParams();
@@ -54,8 +55,7 @@ export default function GroundDetailsPage() {
   }, [selectedSlot]);
 
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const socket = io(socketUrl, { withCredentials: true, transports: ['websocket', 'polling'] });
+    const socket = io(API_URL, { withCredentials: true, transports: ['websocket', 'polling'] });
 
     socket.on('slotStatusUpdated', (data) => {
       // If the slot that got updated belongs to this ground, update local state
@@ -347,7 +347,7 @@ export default function GroundDetailsPage() {
           {/* Main Photo Card */}
           <div className="aspect-video w-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden relative">
             <img 
-              src={ground.main_photo || (import.meta.env.VITE_API_URL || '') + '/uploads/default-main.jpg'} 
+              src={ground.main_photo || API_URL + '/uploads/default-main.jpg'} 
               alt={ground.name} 
               className="h-full w-full object-cover"
             />
@@ -368,7 +368,7 @@ export default function GroundDetailsPage() {
               {ground.photos.slice(0, 5).map((photo, idx) => (
                 <div key={idx} className="aspect-video rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
                   <img 
-                    src={photo.photo_url.startsWith('http') ? photo.photo_url : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${photo.photo_url}`}
+                    src={photo.photo_url.startsWith('http') ? photo.photo_url : `${API_URL}${photo.photo_url}`}
                     alt={`Gallery ${idx + 1}`} 
                     className="h-full w-full object-cover"
                   />
