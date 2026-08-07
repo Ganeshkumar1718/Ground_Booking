@@ -47,9 +47,16 @@ export default function GroundDetailsPage() {
   const [reportForm, setReportForm] = useState({ reason: '', description: '' });
 
   // Socket connection
+  const selectedSlotRef = React.useRef(selectedSlot);
+  
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const socket = io(socketUrl);
+    selectedSlotRef.current = selectedSlot;
+  }, [selectedSlot]);
+
+  useEffect(() => {
+    const defaultUrl = import.meta.env.PROD ? 'https://ground-booking-1-6kku.onrender.com' : 'http://localhost:5000';
+    const socketUrl = import.meta.env.VITE_API_URL || defaultUrl;
+    const socket = io(socketUrl, { withCredentials: true, transports: ['websocket', 'polling'] });
 
     socket.on('slotStatusUpdated', (data) => {
       // If the slot that got updated belongs to this ground, update local state
@@ -58,7 +65,8 @@ export default function GroundDetailsPage() {
           slot.id === data.slotId ? { ...slot, status: data.status } : slot
         )
       );
-      if (selectedSlot && selectedSlot.id === data.slotId && data.status !== 'available') {
+      const currentSelected = selectedSlotRef.current;
+      if (currentSelected && currentSelected.id === data.slotId && data.status !== 'available') {
         if (!user || data.userId !== user.id) {
           setSelectedSlot(null);
           toast.error('The selected slot was just booked by another user!');
@@ -69,7 +77,7 @@ export default function GroundDetailsPage() {
     return () => {
       socket.disconnect();
     };
-  }, [selectedSlot, user]);
+  }, [user, id]); // Connect once per page load/user change
 
   // Load ground details
   useEffect(() => {
@@ -211,11 +219,6 @@ export default function GroundDetailsPage() {
     if (!user) {
       toast.error('Please log in to book a slot');
       navigate('/login');
-      return;
-    }
-
-    if (user.role !== 'user') {
-      toast.error('Only players can book slots');
       return;
     }
 
@@ -361,17 +364,19 @@ export default function GroundDetailsPage() {
           </div>
 
           {/* Photo Gallery Grid */}
-          <div className="grid grid-cols-5 gap-3">
-            {[1, 2, 3, 4, 5].map((idx) => (
-              <div key={idx} className="aspect-video rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
-                <img 
-                  src={`https://loremflickr.com/800/600/${(ground.sports && ground.sports[0]?.name?.toLowerCase().replace(/ /g, '')) || 'sports'}?lock=${ground.id * 10 + idx}`} 
-                  alt="Gallery" 
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
+          {ground.photos && ground.photos.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {ground.photos.slice(0, 5).map((photo, idx) => (
+                <div key={idx} className="aspect-video rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
+                  <img 
+                    src={photo.photo_url.startsWith('http') ? photo.photo_url : `${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://ground-booking-1-6kku.onrender.com' : 'http://localhost:5000')}${photo.photo_url}`}
+                    alt={`Gallery ${idx + 1}`} 
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Ground Descriptions */}
           <div className="space-y-4 bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
