@@ -3,6 +3,6 @@
 
 export const API_URL = import.meta.env.VITE_API_URL || (
   window.location.hostname.includes('vercel.app') 
-    ? 'https://your-backend-app.onrender.com' // <-- Replace this with your actual Render backend URL
+    ? 'https://ground-booking-1-6kku.onrender.com' // <-- Replace this with your actual Render backend URL
     : 'http://localhost:5000'
 );
