@@ -7,6 +7,7 @@ import {
   Sparkles, Award, Zap, Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../config';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -458,7 +459,7 @@ export default function LandingPage() {
                 >
                   <div className="relative h-48 w-full overflow-hidden bg-slate-900">
                     <img 
-                      src={ground.main_photo || `/uploads/${ground.id}.jpg`} 
+                      src={getImageUrl(ground.main_photo || `/uploads/${ground.id}.jpg`)} 
                       onError={(e) => { e.target.src = fallbackGrounds[index % 4].main_photo || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=800&auto=format&fit=crop"; }}
                       alt={ground.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 

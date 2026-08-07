@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { AlertTriangle, CheckCircle, XCircle, User, Phone, MapPin, Calendar, Clock, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../../config';
 
 export default function GroundVerification() {
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
@@ -255,7 +256,7 @@ export default function GroundVerification() {
                           <div>
                             <div className="aspect-video w-full rounded overflow-hidden bg-slate-900 relative">
                               <img 
-                                src={(photo.image_url || photo.photo_url)?.startsWith('http') ? (photo.image_url || photo.photo_url) : (photo.image_url || photo.photo_url || '/uploads/default-main.jpg')} 
+                                src={getImageUrl(photo.image_url || photo.photo_url || '/uploads/default-main.jpg')} 
                                 alt="Capture" 
                                 className="h-full w-full object-cover" 
                               />

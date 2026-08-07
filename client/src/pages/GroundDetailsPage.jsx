@@ -6,7 +6,7 @@ import { Star, Heart, MapPin, Calendar, Clock, CreditCard, ChevronRight, Activit
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import AIChatbox from '../components/AIChatbox';
-import { API_URL } from '../config';
+import { API_URL, getImageUrl } from '../config';
 
 export default function GroundDetailsPage() {
   const { id } = useParams();
@@ -347,7 +347,7 @@ export default function GroundDetailsPage() {
           {/* Main Photo Card */}
           <div className="aspect-video w-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden relative">
             <img 
-              src={ground.main_photo || API_URL + '/uploads/default-main.jpg'} 
+              src={getImageUrl(ground.main_photo || '/uploads/default-main.jpg')} 
               alt={ground.name} 
               className="h-full w-full object-cover"
             />
@@ -368,7 +368,7 @@ export default function GroundDetailsPage() {
               {ground.photos.slice(0, 5).map((photo, idx) => (
                 <div key={idx} className="aspect-video rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
                   <img 
-                    src={photo.photo_url.startsWith('http') ? photo.photo_url : `${API_URL}${photo.photo_url}`}
+                    src={getImageUrl(photo.photo_url)}
                     alt={`Gallery ${idx + 1}`} 
                     className="h-full w-full object-cover"
                   />

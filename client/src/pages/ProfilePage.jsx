@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Camera, User, Phone, Mail, Shield, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../config';
 
 export default function ProfilePage() {
   const { user, login } = useContext(AuthContext); // We'll re-login to update context with new image
@@ -86,7 +87,7 @@ export default function ProfilePage() {
             <div className="relative group">
               <div className="h-24 w-24 rounded-full bg-slate-800 border-4 border-slate-900 overflow-hidden flex items-center justify-center relative">
                 {user.profile_image ? (
-                  <img src={user.profile_image} alt={user.name} className="h-full w-full object-cover" />
+                  <img src={getImageUrl(user.profile_image)} alt={user.name} className="h-full w-full object-cover" />
                 ) : (
                   <User className="h-10 w-10 text-slate-500" />
                 )}

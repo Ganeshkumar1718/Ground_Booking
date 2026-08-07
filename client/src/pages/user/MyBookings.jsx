@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Calendar, Trash2, Edit3, ShieldAlert, Star, FileText, CheckCircle, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../../config';
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -113,7 +114,7 @@ export default function MyBookings() {
                 <div className="flex gap-4 items-start">
                   <div className="w-20 h-20 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden shrink-0">
                     <img 
-                      src={b.main_photo || '/uploads/default-main.jpg'} 
+                      src={getImageUrl(b.main_photo || '/uploads/default-main.jpg')} 
                       alt={b.ground_name} 
                       className="w-full h-full object-cover"
                     />

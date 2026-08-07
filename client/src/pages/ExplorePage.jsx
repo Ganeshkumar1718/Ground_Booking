@@ -7,6 +7,7 @@ import {
   Navigation, X, ShieldCheck, Info, Calendar, Clock, ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../config';
 
 export default function ExplorePage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -878,7 +879,7 @@ export default function ExplorePage() {
                   {/* Photo Container with Lazy Loading */}
                   <div className="aspect-video w-full bg-slate-800 relative overflow-hidden">
                     <img 
-                      src={ground.main_photo || (import.meta.env.VITE_API_URL || '') + '/uploads/default-main.jpg'} 
+                      src={getImageUrl(ground.main_photo || '/uploads/default-main.jpg')} 
                       alt={ground.name} 
                       loading="lazy"
                       className="h-full w-full object-cover group-hover:scale-105 transition duration-300"

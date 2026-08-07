@@ -5,7 +5,7 @@ import { Menu, X, Bell, LogOut, User, MapPin, Moon, Sun, ChevronDown } from 'luc
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import toast from 'react-hot-toast';
-import { API_URL } from '../config';
+import { API_URL, getImageUrl } from '../config';
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -195,7 +195,7 @@ export default function Navbar() {
                 >
                   <div className="h-9 w-9 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 overflow-hidden">
                     {user.profile_image ? (
-                      <img src={user.profile_image} alt={user.name} className="h-full w-full object-cover" />
+                      <img src={getImageUrl(user.profile_image)} alt={user.name} className="h-full w-full object-cover" />
                     ) : (
                       <User className="h-5 w-5 text-gray-400" />
                     )}

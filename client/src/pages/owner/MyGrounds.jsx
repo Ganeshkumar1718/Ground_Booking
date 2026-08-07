@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { PlusCircle, Clock, CheckCircle2, XCircle, AlertTriangle, Eye, Calendar, MapPin, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getImageUrl } from '../../config';
 
 export default function MyGrounds() {
   const [grounds, setGrounds] = useState([]);
@@ -90,7 +91,7 @@ export default function MyGrounds() {
                   {/* Image banner with status badge */}
                   <div className="relative aspect-[16/9] bg-slate-950 overflow-hidden">
                     <img 
-                      src={ground.main_photo || '/uploads/default-main.jpg'} 
+                      src={getImageUrl(ground.main_photo || '/uploads/default-main.jpg')} 
                       alt={ground.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                     />
