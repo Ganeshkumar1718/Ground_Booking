@@ -192,7 +192,7 @@ app.get('/api/deployment-status', (req, res) => {
     vercel: {
       connected: !!(hasVercelDir || hasVercelJson || vercelEnv),
       environment: process.env.VERCEL_ENV || 'Unknown/Local',
-      url: process.env.VERCEL_URL ? \`https://\${process.env.VERCEL_URL}\` : null,
+      url: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
       missingConfig: vercelMissing
     },
     render: {
