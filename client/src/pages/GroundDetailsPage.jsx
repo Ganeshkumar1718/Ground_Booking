@@ -54,8 +54,7 @@ export default function GroundDetailsPage() {
   }, [selectedSlot]);
 
   useEffect(() => {
-    const defaultUrl = import.meta.env.PROD ? 'https://ground-booking-1-6kku.onrender.com' : 'http://localhost:5000';
-    const socketUrl = import.meta.env.VITE_API_URL || defaultUrl;
+    const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const socket = io(socketUrl, { withCredentials: true, transports: ['websocket', 'polling'] });
 
     socket.on('slotStatusUpdated', (data) => {
@@ -369,7 +368,7 @@ export default function GroundDetailsPage() {
               {ground.photos.slice(0, 5).map((photo, idx) => (
                 <div key={idx} className="aspect-video rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
                   <img 
-                    src={photo.photo_url.startsWith('http') ? photo.photo_url : `${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://ground-booking-1-6kku.onrender.com' : 'http://localhost:5000')}${photo.photo_url}`}
+                    src={photo.photo_url.startsWith('http') ? photo.photo_url : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${photo.photo_url}`}
                     alt={`Gallery ${idx + 1}`} 
                     className="h-full w-full object-cover"
                   />

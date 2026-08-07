@@ -35,8 +35,7 @@ export default function Navbar() {
         .catch(err => console.error('Error fetching notifications:', err));
 
       if (!socketRef.current) {
-        const defaultUrl = import.meta.env.PROD ? 'https://ground-booking-1-6kku.onrender.com' : 'http://localhost:5000';
-        const socketUrl = import.meta.env.VITE_API_URL || defaultUrl;
+        const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         socketRef.current = io(socketUrl, { withCredentials: true });
       }
       
