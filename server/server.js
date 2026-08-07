@@ -1091,6 +1091,13 @@ app.delete('*', (req, res) => res.json({ success: true }));
 //   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 // });
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Ground Booking API is running"
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
